@@ -1,0 +1,3 @@
+[submodule "netboot"]
+	path = ipxe
+	url = https://github.com/sbrudenell/sbrudenell-netboot.git

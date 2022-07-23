@@ -1,0 +1,4 @@
+Port 17463
+AuthorizedKeysFile .ssh/authorized_keys
+Subsystem sftp /usr/lib/ssh/sftp-server
+StreamLocalBindUnlink yes
