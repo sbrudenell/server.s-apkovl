@@ -94,6 +94,7 @@ def main() -> NoReturn:
     args = parser.parse_args()
 
     qemu_args: list[ArgType] = ["qemu-system-x86_64"]
+    qemu_args.extend(["-enable-kvm"])
     qemu_args.extend(["-machine", "q35"])
     qemu_args.extend(["-cpu", "Skylake-Server-v4"])
     qemu_args.extend(["-m", "4096"])
