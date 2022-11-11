@@ -18,6 +18,5 @@ tags
 # Persistent undo
 [._]*.un~
 
-
-netboot.iso
-uefi.img
+bin/
+venv/

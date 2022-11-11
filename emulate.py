@@ -1,19 +1,13 @@
 #!/usr/bin/env python3
 
-import argparse
 import os
 import pathlib
-import subprocess
+import sys
 from typing import Iterable, List, NoReturn, Sequence, Union
 
 import requests
 
 ArgType = Union[str, bytes, os.PathLike]
-
-
-def call(args: Sequence[ArgType]) -> int:
-    print(args)
-    return subprocess.check_call(args)
 
 
 def combine_opts(args: Sequence[ArgType]) -> ArgType:
@@ -75,24 +69,7 @@ def net_args(
     return args
 
 
-DIR = pathlib.Path(__file__).parent
-
-
 def main() -> NoReturn:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--netboot", action="store_true")
-    parser.add_argument(
-        "--ipxe",
-        type=pathlib.Path,
-        default=DIR / "ipxe/ipxe/src/bin-x86_64-efi/ipxe.efi",
-    )
-    parser.add_argument("--ipxe-cfg", type=pathlib.Path, default=DIR / "ipxe.cfg")
-    parser.add_argument(
-        "--bios", type=pathlib.Path, default=pathlib.Path("/usr/share/ovmf/OVMF.fd")
-    )
-
-    args = parser.parse_args()
-
     qemu_args: list[ArgType] = ["qemu-system-x86_64"]
     qemu_args.extend(["-enable-kvm"])
     qemu_args.extend(["-machine", "q35"])
@@ -101,7 +78,6 @@ def main() -> NoReturn:
     qemu_args.extend(["-serial", "vc"])  # ttyS0
     qemu_args.extend(["-serial", "null"])  # ttyS1
     qemu_args.extend(["-serial", "vc"])  # ttyS2
-    qemu_args.extend(["-bios", args.bios])
 
     qemu_args.extend(
         net_args(
@@ -130,26 +106,7 @@ def main() -> NoReturn:
         )
     )
 
-    if args.netboot:
-        netboot_path = pathlib.Path("netboot.iso")
-        netboot_img = requests.get("https://boot.netboot.xyz/ipxe/netboot.xyz.iso")
-        netboot_path.write_bytes(netboot_img.content)
-        qemu_args.extend(["-cdrom", netboot_path])
-    else:
-        ipxe_path = args.ipxe.resolve(strict=True)
-        ipxe_cfg_path = args.ipxe_cfg.resolve(strict=True)
-        esp_path = pathlib.Path("uefi.img")
-        esp_size = 64 * 1024 * 1024
-        with esp_path.open(mode="wb") as fp:
-            zero4k = b"\0" * 4096
-            for _ in range(esp_size // len(zero4k)):
-                fp.write(zero4k)
-        call(["mkfs.vfat", esp_path, "-F", "32"])
-        call(["mmd", "-i", esp_path, "::/EFI"])
-        call(["mmd", "-i", esp_path, "::/EFI/BOOT"])
-        call(["mcopy", "-i", esp_path, ipxe_path, "::/EFI/BOOT/BOOTX64.EFI"])
-        call(["mcopy", "-i", esp_path, ipxe_cfg_path, "::/EFI/BOOT/IPXE.CFG"])
-        qemu_args.extend(["-drive", combine_opts([f"file={esp_path}", "format=raw"])])
+    qemu_args.extend(sys.argv[1:])
 
     print(qemu_args)
     os.execvp(qemu_args[0], qemu_args)
