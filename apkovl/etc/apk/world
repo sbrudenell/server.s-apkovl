@@ -1,6 +1,8 @@
 alpine-base
 btrfs-progs
 cryptsetup
+iptables
+iptables-openrc
 lvm2
 mdadm
 openssh
