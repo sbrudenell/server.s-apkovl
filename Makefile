@@ -11,7 +11,7 @@ BIOS=/usr/share/ovmf/OVMF.fd
 all: $(ESP)
 
 emulate: $(ESP)
-	$(EMULATE_PY) -bios $(BIOS) -drive file=$(ESP),format=raw
+	$(EMULATE_PY) -bios $(BIOS) -drive if=virtio,file=$(ESP),format=raw
 
 submodules:
 	git submodule update --init --recursive
