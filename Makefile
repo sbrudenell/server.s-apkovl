@@ -24,7 +24,7 @@ $(IPXE): submodules
 
 $(APKOVL): $(shell find $(APKOVL_SRC))
 	mkdir -p $(dir $(APKOVL))
-	tar --owner=0 --group=0 -cvzpCf $(APKOVL_SRC) . $(APKOVL)
+	tar --owner=0 --group=0 -c -v -z -p -C $(APKOVL_SRC) . -f $(APKOVL)
 
 $(ESP): $(IPXE) $(IPXE_CFG) $(APKOVL)
 	mkdir -p $(dir $(ESP))
