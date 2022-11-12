@@ -1,6 +1,0 @@
-#!/bin/sh
-
-/sbin/nameif -s tmpeth0 AC:1F:6B:22:61:58
-/sbin/nameif -s tmpeth1 AC:1F:6B:22:61:59
-/sbin/nameif -s eth0 AC:1F:6B:22:61:58
-/sbin/nameif -s eth1 AC:1F:6B:22:61:59
