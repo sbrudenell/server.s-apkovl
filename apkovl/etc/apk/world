@@ -4,5 +4,4 @@ cryptsetup
 lvm2
 mdadm
 openssh
-tzdata
 vim
