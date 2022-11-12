@@ -1,2 +1,2 @@
-LABEL=BOOT-EFI /boot/efi vfat noauto,noatime 1 2
-LABEL=data /mnt/btr_pool btrfs noauto,rw,noatime,compress=zstd,nossd,space_cache=v2,autodefrag,subvolid=5,subvol=/ 0 1
+LABEL=BOOT-EFI /boot/efi vfat noauto,noatime 0 0
+LABEL=data /mnt/btr_pool btrfs noauto,rw,noatime,compress=zstd,nossd,space_cache=v2,autodefrag,subvolid=5,subvol=/ 0 0
