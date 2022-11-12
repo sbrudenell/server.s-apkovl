@@ -55,16 +55,16 @@ def net_args(
         device_opts.append(f"mac={mac}")
     args.extend(["-device", combine_opts(device_opts)])
 
-    # if instance is not None:
-    #    smbios_opts: List[ArgType] = [
-    #        "type=41",
-    #        "kind=ethernet",
-    #        f"pcidev={id}-dev",
-    #        f"instance={instance}",
-    #    ]
-    #    if designation is not None:
-    #        smbios_opts.append(f"designation={designation}")
-    #    args.extend(["-smbios", combine_opts(smbios_opts)])
+    if instance is not None:
+       smbios_opts: List[ArgType] = [
+           "type=41",
+           "kind=ethernet",
+           f"pcidev={id}-dev",
+           f"instance={instance}",
+       ]
+       if designation is not None:
+           smbios_opts.append(f"designation={designation}")
+       args.extend(["-smbios", combine_opts(smbios_opts)])
 
     return args
 
