@@ -219,13 +219,14 @@
 
 # Do not log packets that are going to ports used by SMB
 # (Samba / Windows Sharing).
+# Also: ssh
 -A INPUT -p udp -m multiport --dports 135,445 -j DROP
 # -6 -A FORWARD -p udp -m multiport --dports 135,445 -j DROP
 -A INPUT -p udp --dport 137:139 -j DROP
 # -6 -A FORWARD -p udp --dport 137:139 -j DROP
 -A INPUT -p udp --sport 137 --dport 1024:65535 -j DROP
 # -6 -A FORWARD -p udp --sport 137 --dport 1024:65535 -j DROP
--A INPUT -p tcp -m multiport --dports 135,139,445 -j DROP
+-A INPUT -p tcp -m multiport --dports 135,139,445,22 -j DROP
 # -6 -A FORWARD -p tcp -m multiport --dports 135,139,445 -j DROP
 
 # Do not log packets that are going to port used by UPnP protocol.
@@ -240,8 +241,8 @@
 # -6 -A FORWARD -p tcp --dport 113 --syn -m conntrack --ctstate NEW -j REJECT --reject-with tcp-reset
 
 # Prevent DOS by filling log files.
--4 -A INPUT -i eth0 -m limit --limit 1/second --limit-burst 100 -j LOG --log-prefix "iptables[DOS]: "
--4 -A DOCKER-USER -i eth0 -m limit --limit 1/second --limit-burst 100 -j LOG --log-prefix "iptables[DOS]: "
+# -4 -A INPUT -i eth0 -m limit --limit 1/second --limit-burst 100 -j LOG --log-prefix "iptables[DOS]: "
+# -4 -A DOCKER-USER -i eth0 -m limit --limit 1/second --limit-burst 100 -j LOG --log-prefix "iptables[DOS]: "
 # -6 -A FORWARD -m limit --limit 1/second --limit-burst 100 -j LOG --log-prefix "iptables[DOS]: "
 
 COMMIT
