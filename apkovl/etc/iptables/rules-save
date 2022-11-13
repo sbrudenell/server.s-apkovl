@@ -60,36 +60,51 @@
 :FORWARD DROP [0:0]
 :OUTPUT ACCEPT [0:0]
 
+# Create this early for useful grouping of rules later
+-4 -N DOCKER-USER
+
 # Don't attempt to firewall internal traffic on the loopback device.
 -A INPUT -i lo -j ACCEPT
+-4 -A DOCKER-USER -i lo -j RETURN
+-4 -A DOCKER-USER -i br+ -j RETURN
+-4 -A DOCKER-USER -i docker0 -j RETURN
+#-6 -A FORWARD -i lo -j ACCEPT
+#-6 -A FORWARD -i br+ -j ACCEPT
+#-6 -A FORWARD -i docker0 -j ACCEPT
 
 # Continue connections that are already established or related to an established
 # connection.
 -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+-4 -A DOCKER-USER -m conntrack --ctstate RELATED,ESTABLISHED -j RETURN
+#-6 -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 
 # Drop non-conforming packets, such as malformed headers, etc.
 -A INPUT -m conntrack --ctstate INVALID -j DROP
+-4 -A DOCKER-USER -m conntrack --ctstate INVALID -j RETURN
+#-6 -A FORWARD -m conntrack --ctstate INVALID -j DROP
 
 # Block remote packets claiming to be from a loopback address.
--A INPUT -s 127.0.0.0/8 ! -i lo -j DROP
+-4 -A INPUT -s 127.0.0.0/8 ! -i lo -j DROP
+#-6 -A INPUT -s ::1/128 ! -i lo -j DROP
+#-6 -A FORWARD -s ::1/128 ! -i lo -j DROP
 
 # Drop all packets that are going to broadcast, multicast or anycast address.
--A INPUT -m addrtype --dst-type BROADCAST -j DROP
--A INPUT -m addrtype --dst-type MULTICAST -j DROP
--A INPUT -m addrtype --dst-type ANYCAST -j DROP
--A INPUT -d 224.0.0.0/4 -j DROP
+-4 -A INPUT -m addrtype --dst-type BROADCAST -j DROP
+-4 -A INPUT -m addrtype --dst-type MULTICAST -j DROP
+-4 -A INPUT -m addrtype --dst-type ANYCAST -j DROP
+-4 -A INPUT -d 224.0.0.0/4 -j DROP
 
 # Chain for preventing SSH brute-force attacks.
 # Permits 10 new connections within 5 minutes from a single host then drops
 # incomming connections from that host. Beyond a burst of 100 connections we
 # log at up 1 attempt per second to prevent filling of logs.
--N SSHBRUTE
--A SSHBRUTE -m recent --name SSH --set
--A SSHBRUTE -m recent --name SSH --update --seconds 300 --hitcount 10 -m limit --limit 1/second --limit-burst 100 -j LOG --log-prefix "iptables[SSH-brute]: "
--A SSHBRUTE -m recent --name SSH --update --seconds 300 --hitcount 10 -j DROP
--N fail2ban-ssh
--A SSHBRUTE -j fail2ban-ssh
--A SSHBRUTE -j ACCEPT
+#-N SSHBRUTE
+#-A SSHBRUTE -m recent --name SSH --set
+#-A SSHBRUTE -m recent --name SSH --update --seconds 300 --hitcount 10 -m limit --limit 1/second --limit-burst 100 -j LOG --log-prefix "iptables[SSH-brute]: "
+#-A SSHBRUTE -m recent --name SSH --update --seconds 300 --hitcount 10 -j DROP
+#-N fail2ban-ssh
+#-A SSHBRUTE -j fail2ban-ssh
+#-A SSHBRUTE -j ACCEPT
 
 # Chain for preventing ping flooding - up to 6 pings per second from a single
 # source, again with log limiting. Also prevents us from ICMP REPLY flooding
@@ -109,7 +124,36 @@
 ###############################################################################
 
 # Accept HTTP and HTTPS
-#-A INPUT -p tcp -m multiport --dports 80,443 --syn -m conntrack --ctstate NEW -j ACCEPT
+-4 -A DOCKER-USER -p tcp -m multiport --dports 80,443 --syn -m conntrack --ctstate NEW -j RETURN
+#-6 -A FORWARD -d 2a06:82c1:0:12:1::80 -p tcp -m multiport --dports 80,443 --syn -m conntrack --ctstate NEW -j ACCEPT
+#-6 -A FORWARD -d 2a06:82c1:0:12::2 -p tcp -m multiport --dports 80,443 --syn -m conntrack --ctstate NEW -j ACCEPT
+
+# Accept bittorrent
+-4 -A DOCKER-USER -p tcp --dport 63721 --syn -m conntrack --ctstate NEW -j RETURN
+-4 -A DOCKER-USER -p udp --dport 63721 -m conntrack --ctstate NEW -j RETURN
+#-6 -A FORWARD -p tcp --syn -d 2a06:82c1:0:12:1::9092 --dport 63721 -m conntrack --ctstate NEW -j ACCEPT
+#-6 -A FORWARD -p udp -d 2a06:82c1:0:12:1::9092 --dport 63721 -m conntrack --ctstate NEW -j ACCEPT
+
+# Accept Plex
+-4 -A DOCKER-USER -p tcp --dport 32400 --syn -m conntrack --ctstate NEW -j RETURN
+#-6 -A FORWARD -d 2a06:82c1:0:12:1::3240 -p tcp --dport 32400 --syn -m conntrack --ctstate NEW -j ACCEPT
+
+# Accept Emby
+-4 -A DOCKER-USER -p tcp -m multiport --dports 8096,8920 --syn -m conntrack --ctstate NEW -j RETURN
+#-6 -A FORWARD -d 2a06:82c1:0:12:1::8096 -p tcp -m multiport --dports 8096,8920 --syn -m conntrack --ctstate NEW -j ACCEPT
+
+# Accept FTP only for IPv4
+#-4 -A INPUT -p tcp --dport 21 --syn -m conntrack --ctstate NEW -j ACCEPT
+
+# node_exporter runs in host mode
+-4 -A INPUT -p tcp --dport 9100 --syn -m conntrack --ctstate NEW -s 172.16.0.0/12 -j ACCEPT
+-4 -A INPUT -p tcp --dport 9100 --syn -m conntrack --ctstate NEW -s 192.168.0.0/16 -j ACCEPT
+
+# mosh
+-A INPUT -p udp --dport 60000:60010 -m conntrack --ctstate NEW -j ACCEPT
+
+# ssh
+-A INPUT -p tcp --dport 17463 --syn -m conntrack --ctstate NEW -j ACCEPT
 
 
 ###############################################################################
@@ -120,35 +164,85 @@
 
 # Accept worldwide access to SSH and use SSHBRUTE chain for preventing
 # brute-force attacks.
--A INPUT -p tcp --dport 17463 --syn -m conntrack --ctstate NEW -j SSHBRUTE
+# -A INPUT -p tcp --dport 17463 --syn -m conntrack --ctstate NEW -j SSHBRUTE
 
 # Permit useful IMCP packet types.
 # Note: RFC 792 states that all hosts MUST respond to ICMP ECHO requests.
 # Blocking these can make diagnosing of even simple faults much more tricky.
 # Real security lies in locking down and hardening all services, not by hiding.
--A INPUT -p icmp --icmp-type 0  -m conntrack --ctstate NEW -j ACCEPT
--A INPUT -p icmp --icmp-type 3  -m conntrack --ctstate NEW -j ACCEPT
--A INPUT -p icmp --icmp-type 8  -m conntrack --ctstate NEW -j ICMPFLOOD
--A INPUT -p icmp --icmp-type 11 -m conntrack --ctstate NEW -j ACCEPT
+-4 -A INPUT -p icmp --icmp-type 0  -m conntrack --ctstate NEW -j ACCEPT
+-4 -A INPUT -p icmp --icmp-type 3  -m conntrack --ctstate NEW -j ACCEPT
+-4 -A INPUT -p icmp --icmp-type 8  -m conntrack --ctstate NEW -j ICMPFLOOD
+-4 -A INPUT -p icmp --icmp-type 11 -m conntrack --ctstate NEW -j ACCEPT
+
+# Permit needed ICMP packet types for IPv6 per RFC 4890.
+-6 -A INPUT              -p ipv6-icmp --icmpv6-type 1   -j ACCEPT
+-6 -A INPUT              -p ipv6-icmp --icmpv6-type 2   -j ACCEPT
+-6 -A INPUT              -p ipv6-icmp --icmpv6-type 3   -j ACCEPT
+-6 -A INPUT              -p ipv6-icmp --icmpv6-type 4   -j ACCEPT
+-6 -A INPUT              -p ipv6-icmp --icmpv6-type 133 -j ACCEPT
+-6 -A INPUT              -p ipv6-icmp --icmpv6-type 134 -j ACCEPT
+-6 -A INPUT              -p ipv6-icmp --icmpv6-type 135 -j ACCEPT
+-6 -A INPUT              -p ipv6-icmp --icmpv6-type 136 -j ACCEPT
+-6 -A INPUT              -p ipv6-icmp --icmpv6-type 137 -j ACCEPT
+-6 -A INPUT              -p ipv6-icmp --icmpv6-type 141 -j ACCEPT
+-6 -A INPUT              -p ipv6-icmp --icmpv6-type 142 -j ACCEPT
+-6 -A INPUT -s fe80::/10 -p ipv6-icmp --icmpv6-type 130 -j ACCEPT
+-6 -A INPUT -s fe80::/10 -p ipv6-icmp --icmpv6-type 131 -j ACCEPT
+-6 -A INPUT -s fe80::/10 -p ipv6-icmp --icmpv6-type 132 -j ACCEPT
+-6 -A INPUT -s fe80::/10 -p ipv6-icmp --icmpv6-type 143 -j ACCEPT
+-6 -A INPUT              -p ipv6-icmp --icmpv6-type 148 -j ACCEPT
+-6 -A INPUT              -p ipv6-icmp --icmpv6-type 149 -j ACCEPT
+-6 -A INPUT -s fe80::/10 -p ipv6-icmp --icmpv6-type 151 -j ACCEPT
+-6 -A INPUT -s fe80::/10 -p ipv6-icmp --icmpv6-type 152 -j ACCEPT
+-6 -A INPUT -s fe80::/10 -p ipv6-icmp --icmpv6-type 153 -j ACCEPT
+-6 -A FORWARD              -p ipv6-icmp --icmpv6-type 1   -j ACCEPT
+-6 -A FORWARD              -p ipv6-icmp --icmpv6-type 2   -j ACCEPT
+-6 -A FORWARD              -p ipv6-icmp --icmpv6-type 3   -j ACCEPT
+-6 -A FORWARD              -p ipv6-icmp --icmpv6-type 4   -j ACCEPT
+-6 -A FORWARD              -p ipv6-icmp --icmpv6-type 133 -j ACCEPT
+-6 -A FORWARD              -p ipv6-icmp --icmpv6-type 134 -j ACCEPT
+-6 -A FORWARD              -p ipv6-icmp --icmpv6-type 135 -j ACCEPT
+-6 -A FORWARD              -p ipv6-icmp --icmpv6-type 136 -j ACCEPT
+-6 -A FORWARD              -p ipv6-icmp --icmpv6-type 137 -j ACCEPT
+-6 -A FORWARD              -p ipv6-icmp --icmpv6-type 141 -j ACCEPT
+-6 -A FORWARD              -p ipv6-icmp --icmpv6-type 142 -j ACCEPT
+-6 -A FORWARD -s fe80::/10 -p ipv6-icmp --icmpv6-type 130 -j ACCEPT
+-6 -A FORWARD -s fe80::/10 -p ipv6-icmp --icmpv6-type 131 -j ACCEPT
+-6 -A FORWARD -s fe80::/10 -p ipv6-icmp --icmpv6-type 132 -j ACCEPT
+-6 -A FORWARD -s fe80::/10 -p ipv6-icmp --icmpv6-type 143 -j ACCEPT
+-6 -A FORWARD              -p ipv6-icmp --icmpv6-type 148 -j ACCEPT
+-6 -A FORWARD              -p ipv6-icmp --icmpv6-type 149 -j ACCEPT
+-6 -A FORWARD -s fe80::/10 -p ipv6-icmp --icmpv6-type 151 -j ACCEPT
+-6 -A FORWARD -s fe80::/10 -p ipv6-icmp --icmpv6-type 152 -j ACCEPT
+-6 -A FORWARD -s fe80::/10 -p ipv6-icmp --icmpv6-type 153 -j ACCEPT
 
 # Do not log packets that are going to ports used by SMB
 # (Samba / Windows Sharing).
 -A INPUT -p udp -m multiport --dports 135,445 -j DROP
+# -6 -A FORWARD -p udp -m multiport --dports 135,445 -j DROP
 -A INPUT -p udp --dport 137:139 -j DROP
+# -6 -A FORWARD -p udp --dport 137:139 -j DROP
 -A INPUT -p udp --sport 137 --dport 1024:65535 -j DROP
+# -6 -A FORWARD -p udp --sport 137 --dport 1024:65535 -j DROP
 -A INPUT -p tcp -m multiport --dports 135,139,445 -j DROP
+# -6 -A FORWARD -p tcp -m multiport --dports 135,139,445 -j DROP
 
 # Do not log packets that are going to port used by UPnP protocol.
--A INPUT -p udp --dport 1900 -j DROP
+# -A INPUT -p udp --dport 1900 -j DROP
 
 # Do not log late replies from nameservers.
 -A INPUT -p udp --sport 53 -j DROP
+# -6 -A FORWARD -p udp --sport 53 -j DROP
 
 # Good practise is to explicately reject AUTH traffic so that it fails fast.
 -A INPUT -p tcp --dport 113 --syn -m conntrack --ctstate NEW -j REJECT --reject-with tcp-reset
+# -6 -A FORWARD -p tcp --dport 113 --syn -m conntrack --ctstate NEW -j REJECT --reject-with tcp-reset
 
 # Prevent DOS by filling log files.
--A INPUT -m limit --limit 1/second --limit-burst 100 -j LOG --log-prefix "iptables[DOS]: "
+-4 -A INPUT -i eth1 -m limit --limit 1/second --limit-burst 100 -j LOG --log-prefix "iptables[DOS]: "
+-4 -A DOCKER-USER -i eth1 -m limit --limit 1/second --limit-burst 100 -j LOG --log-prefix "iptables[DOS]: "
+# -6 -A FORWARD -m limit --limit 1/second --limit-burst 100 -j LOG --log-prefix "iptables[DOS]: "
 
 COMMIT
 
