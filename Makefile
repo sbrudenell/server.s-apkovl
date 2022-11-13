@@ -22,7 +22,7 @@ update:
 $(IPXE): submodules
 	$(MAKE) -C ipxe $(IPXE_INNER)
 
-$(APKOVL): $(shell find -type f $(APKOVL_SRC))
+$(APKOVL): $(shell find $(APKOVL_SRC) -type f)
 	mkdir -p $(dir $(APKOVL))
 	tar --owner=0 --group=0 -c -v -z -p -C $(APKOVL_SRC) . -f $(APKOVL)
 
