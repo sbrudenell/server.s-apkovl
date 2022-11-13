@@ -11,6 +11,9 @@ BIOS=/usr/share/ovmf/OVMF.fd
 all: $(ESP)
 
 emulate: $(ESP)
+	$(EMULATE_PY) -bios $(BIOS) -drive if=virtio,file=$(ESP),format=raw -smbios type=3,asset=local-test
+
+emulate_prod: $(ESP)
 	$(EMULATE_PY) -bios $(BIOS) -drive if=virtio,file=$(ESP),format=raw
 
 submodules:
