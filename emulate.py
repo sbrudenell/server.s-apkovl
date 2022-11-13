@@ -83,7 +83,7 @@ def main() -> NoReturn:
         net_args(
             id="eno2",
             mode="user",
-            model="e1000e",  # should be igb
+            model="rtl8139",  # should be igb
             net="10.11.0.0/21",
             host="10.11.0.1",
             restrict="on",
