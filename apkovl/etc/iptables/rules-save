@@ -240,8 +240,8 @@
 # -6 -A FORWARD -p tcp --dport 113 --syn -m conntrack --ctstate NEW -j REJECT --reject-with tcp-reset
 
 # Prevent DOS by filling log files.
--4 -A INPUT -i eth1 -m limit --limit 1/second --limit-burst 100 -j LOG --log-prefix "iptables[DOS]: "
--4 -A DOCKER-USER -i eth1 -m limit --limit 1/second --limit-burst 100 -j LOG --log-prefix "iptables[DOS]: "
+-4 -A INPUT -i eth0 -m limit --limit 1/second --limit-burst 100 -j LOG --log-prefix "iptables[DOS]: "
+-4 -A DOCKER-USER -i eth0 -m limit --limit 1/second --limit-burst 100 -j LOG --log-prefix "iptables[DOS]: "
 # -6 -A FORWARD -m limit --limit 1/second --limit-burst 100 -j LOG --log-prefix "iptables[DOS]: "
 
 COMMIT

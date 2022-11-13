@@ -1,0 +1,19 @@
+#!/sbin/openrc-run
+
+depend() {
+	before net
+}
+
+start() {
+	ifconfig eth0 down
+	ifconfig eth1 down
+	nameif tmpeth0 AC:1F:6B:22:61:58
+	nameif tmpeth1 AC:1F:6B:22:61:59
+	nameif eth0 AC:1F:6B:22:61:58
+	nameif eth1 AC:1F:6B:22:61:59
+	return 0
+}
+
+stop() {
+	return 0
+}

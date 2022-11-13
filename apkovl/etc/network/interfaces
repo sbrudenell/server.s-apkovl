@@ -1,5 +1,5 @@
-auto eth1
-iface eth1
+auto eth0
+iface eth0
 	address 104.218.233.98/29
 	address 104.218.233.99/29
 	address 104.218.233.100/29
