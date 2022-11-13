@@ -102,7 +102,7 @@ def main() -> NoReturn:
             mac="AC:1F:6B:22:61:58",
             instance=1,
             designation="Intel Ethernet i219 #1",
-            hostfwd=("tcp::17463-:17463",),
+            hostfwd=("tcp::17463-104.218.233.98:17463",),
         )
     )
 
