@@ -6,6 +6,7 @@ iptables
 iptables-openrc
 lvm2
 mdadm
+mosh
 openssh
 screen
 vim
