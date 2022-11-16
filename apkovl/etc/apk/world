@@ -7,4 +7,5 @@ iptables-openrc
 lvm2
 mdadm
 openssh
+screen
 vim

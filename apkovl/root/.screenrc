@@ -1,0 +1,2 @@
+hardstatus alwayslastline "%{.kb}%-w%{.bk}%n %t%{-}%+w %=%S %H %0c"
+defutf8 on
