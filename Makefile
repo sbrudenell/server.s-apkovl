@@ -28,6 +28,10 @@ $(IPXE): submodules
 
 $(APKOVL): $(shell find $(APKOVL_SRC) -type f)
 	mkdir -p $(dir $(APKOVL))
+	# special permissions
+	chmod 700 $(APKOVL_SRC)/root
+	chmod 700 $(APKOVL_SRC)/root/.ssh
+	chmod 600 $(APKOVL_SRC)/root/.ssh/authorized_keys
 	tar --owner=0 --group=0 -c -v -z -p -C $(APKOVL_SRC) . -f $(APKOVL)
 
 $(ESP): $(IPXE) $(IPXE_CFG) $(BOOT_CFG) $(APKOVL)
