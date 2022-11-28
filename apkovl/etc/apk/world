@@ -10,4 +10,5 @@ mosh
 openssh
 screen
 shadow
+sudo
 vim
