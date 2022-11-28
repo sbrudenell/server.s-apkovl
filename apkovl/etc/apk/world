@@ -2,6 +2,7 @@ alpine-base
 btrfs-progs
 cryptsetup
 docker
+docker-compose
 iptables
 iptables-openrc
 lvm2
