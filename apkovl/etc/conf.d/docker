@@ -20,7 +20,7 @@
 #DOCKERD_BINARY="/usr/bin/dockerd"
 
 # any other random options you want to pass to docker
-DOCKER_OPTS="--userland-proxy=false"
+DOCKER_OPTS="--userland-proxy=false --log-driver=syslog"
 
 # disable grsecurity features
 #disable_grsec="chroot_deny_chmod chroot_deny_mknod"
