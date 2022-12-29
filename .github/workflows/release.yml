@@ -1,0 +1,21 @@
+name: release
+on:
+  push:
+  pull_request:
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - run: make -j16 release
+
+      - uses: actions/upload-artifact@v3
+        with:
+          path: |
+            bin/server.apkovl.tar.gz
+            ipxe/ipxe/src/bin-x86_64-efi/ipxe.efi
+            ipxe.cfg
+            boot.cfg
