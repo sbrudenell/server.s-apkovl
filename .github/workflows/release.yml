@@ -14,7 +14,6 @@ jobs:
 
       - uses: softprops/action-gh-release@v1
         with:
-          name: ${{ github.sha }}
           files: |
             bin/server.apkovl.tar.gz
             ipxe/ipxe/src/bin-x86_64-efi/ipxe.efi
