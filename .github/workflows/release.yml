@@ -1,0 +1,23 @@
+name: release
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - run: make -j16 release
+
+      - uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ github.sha }}
+          files: |
+            bin/server.apkovl.tar.gz
+            ipxe/ipxe/src/bin-x86_64-efi/ipxe.efi
+            ipxe.cfg
+            boot.cfg

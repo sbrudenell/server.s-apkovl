@@ -11,6 +11,8 @@ BIOS=/usr/share/ovmf/OVMF.fd
 
 all: $(ESP)
 
+release: $(IPXE) $(APKOVL) $(IPXE_CFG) $(BOOT_CFG)
+
 emulate: $(ESP)
 	$(EMULATE_PY) -bios $(BIOS) -drive if=virtio,file=$(ESP),format=raw -smbios type=3,asset=local-test
 
