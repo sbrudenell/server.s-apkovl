@@ -124,7 +124,7 @@
 ###############################################################################
 
 # Accept HTTP and HTTPS
--4 -A DOCKER-USER -p tcp -m multiport --dports 80,443 --syn -m conntrack --ctstate NEW -j RETURN
+-4 -A INPUT -p tcp -m multiport --dports 80,443 --syn -m conntrack --ctstate NEW -j ACCEPT
 #-6 -A FORWARD -d 2a06:82c1:0:12:1::80 -p tcp -m multiport --dports 80,443 --syn -m conntrack --ctstate NEW -j ACCEPT
 #-6 -A FORWARD -d 2a06:82c1:0:12::2 -p tcp -m multiport --dports 80,443 --syn -m conntrack --ctstate NEW -j ACCEPT
 
@@ -135,7 +135,7 @@
 #-6 -A FORWARD -p udp -d 2a06:82c1:0:12:1::9092 --dport 63721 -m conntrack --ctstate NEW -j ACCEPT
 
 # Accept Plex
--4 -A DOCKER-USER -p tcp --dport 32400 --syn -m conntrack --ctstate NEW -j RETURN
+-4 -A INPUT -p tcp --dport 32400 --syn -m conntrack --ctstate NEW -j ACCEPT
 #-6 -A FORWARD -d 2a06:82c1:0:12:1::3240 -p tcp --dport 32400 --syn -m conntrack --ctstate NEW -j ACCEPT
 
 # Accept Emby
