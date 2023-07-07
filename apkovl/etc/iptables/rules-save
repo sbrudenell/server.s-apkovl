@@ -60,14 +60,11 @@
 :FORWARD DROP [0:0]
 :OUTPUT ACCEPT [0:0]
 
-# Create this early for useful grouping of rules later
--4 -N DOCKER-USER
-
 # Don't attempt to firewall internal traffic on the loopback device.
 -A INPUT -i lo -j ACCEPT
--4 -A DOCKER-USER -i lo -j RETURN
--4 -A DOCKER-USER -i br+ -j RETURN
--4 -A DOCKER-USER -i docker0 -j RETURN
+#-4 -A DOCKER-USER -i lo -j RETURN
+#-4 -A DOCKER-USER -i br+ -j RETURN
+#-4 -A DOCKER-USER -i docker0 -j RETURN
 #-6 -A FORWARD -i lo -j ACCEPT
 #-6 -A FORWARD -i br+ -j ACCEPT
 #-6 -A FORWARD -i docker0 -j ACCEPT
@@ -75,12 +72,12 @@
 # Continue connections that are already established or related to an established
 # connection.
 -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
--4 -A DOCKER-USER -m conntrack --ctstate RELATED,ESTABLISHED -j RETURN
+#-4 -A DOCKER-USER -m conntrack --ctstate RELATED,ESTABLISHED -j RETURN
 #-6 -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 
 # Drop non-conforming packets, such as malformed headers, etc.
 -A INPUT -m conntrack --ctstate INVALID -j DROP
--4 -A DOCKER-USER -m conntrack --ctstate INVALID -j RETURN
+#-4 -A DOCKER-USER -m conntrack --ctstate INVALID -j RETURN
 #-6 -A FORWARD -m conntrack --ctstate INVALID -j DROP
 
 # Block remote packets claiming to be from a loopback address.
@@ -129,8 +126,8 @@
 #-6 -A FORWARD -d 2a06:82c1:0:12::2 -p tcp -m multiport --dports 80,443 --syn -m conntrack --ctstate NEW -j ACCEPT
 
 # Accept bittorrent
--4 -A DOCKER-USER -p tcp --dport 63721 --syn -m conntrack --ctstate NEW -j RETURN
--4 -A DOCKER-USER -p udp --dport 63721 -m conntrack --ctstate NEW -j RETURN
+#-4 -A DOCKER-USER -p tcp --dport 63721 --syn -m conntrack --ctstate NEW -j RETURN
+#-4 -A DOCKER-USER -p udp --dport 63721 -m conntrack --ctstate NEW -j RETURN
 #-6 -A FORWARD -p tcp --syn -d 2a06:82c1:0:12:1::9092 --dport 63721 -m conntrack --ctstate NEW -j ACCEPT
 #-6 -A FORWARD -p udp -d 2a06:82c1:0:12:1::9092 --dport 63721 -m conntrack --ctstate NEW -j ACCEPT
 
@@ -139,7 +136,7 @@
 #-6 -A FORWARD -d 2a06:82c1:0:12:1::3240 -p tcp --dport 32400 --syn -m conntrack --ctstate NEW -j ACCEPT
 
 # Accept Emby
--4 -A DOCKER-USER -p tcp -m multiport --dports 8096,8920 --syn -m conntrack --ctstate NEW -j RETURN
+#-4 -A DOCKER-USER -p tcp -m multiport --dports 8096,8920 --syn -m conntrack --ctstate NEW -j RETURN
 #-6 -A FORWARD -d 2a06:82c1:0:12:1::8096 -p tcp -m multiport --dports 8096,8920 --syn -m conntrack --ctstate NEW -j ACCEPT
 
 # Accept FTP only for IPv4
