@@ -1,3 +1,6 @@
 [submodule "netboot"]
 	path = ipxe
 	url = https://github.com/sbrudenell/sbrudenell-netboot.git
+[submodule "apkovl/node-exporter-textfile-collector-scripts"]
+	path = apkovl/usr/local/share/node-exporter-textfile-collector-scripts
+	url = https://github.com/prometheus-community/node-exporter-textfile-collector-scripts.git

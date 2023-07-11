@@ -18,5 +18,5 @@ tags
 # Persistent undo
 [._]*.un~
 
-bin/
-venv/
+/bin/
+/venv/
