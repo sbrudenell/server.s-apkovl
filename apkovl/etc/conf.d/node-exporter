@@ -1,0 +1,1 @@
+ARGS="--collector.interrupts --collector.processes --collector.textfile.directory /var/spool/node_exporter"
