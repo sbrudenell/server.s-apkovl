@@ -5,6 +5,5 @@ D=/usr/local/share/node-exporter-textfile-collector-scripts
 ${D}/btrfs_stats.py
 ${D}/deleted_libraries.py
 ${D}/inotify-instances
-ipmitool sensor | ${D}/ipmitool
 ${D}/md_info_detail.sh
 ${D}/smartmon.sh
