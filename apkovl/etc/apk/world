@@ -4,7 +4,6 @@ btrfs-progs
 cryptsetup
 docker
 docker-cli-compose
-ipmitool
 iptables
 iptables-openrc
 keyutils
