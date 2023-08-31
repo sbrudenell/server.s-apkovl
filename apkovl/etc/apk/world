@@ -16,7 +16,6 @@ prometheus-node-exporter
 prometheus-node-exporter-openrc
 py3-prometheus-client
 screen
-smartmontools
 shadow
 sudo
 vim

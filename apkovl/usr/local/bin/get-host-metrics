@@ -6,4 +6,3 @@ ${D}/btrfs_stats.py
 ${D}/deleted_libraries.py
 ${D}/inotify-instances
 ${D}/md_info_detail.sh
-${D}/smartmon.sh
